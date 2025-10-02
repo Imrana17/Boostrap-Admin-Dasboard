@@ -37,6 +37,8 @@
             transition: all 0.3s ease;
             z-index: 1000;
             width: 250px;
+            left: 0;
+            transform: translateX(0);
         }
 
         .sidebar-header {
@@ -71,7 +73,7 @@
         /* Main Content */
         #content {
             margin-left: 250px;
-            transition: margin-left 0.3s ease;
+            transition: all 0.3s ease;
             min-height: 100vh;
         }
 
@@ -230,23 +232,37 @@
         /* Responsive */
         @media (max-width: 992px) {
             #sidebar {
-                margin-left: -250px;
+                transform: translateX(-100%);
+                width: 280px;
             }
             
             #sidebar.active {
-                margin-left: 0;
+                transform: translateX(0);
             }
             
             #content {
                 margin-left: 0;
-            }
-            
-            #content.active {
-                margin-left: 250px;
+                width: 100%;
             }
             
             #sidebarCollapse span {
                 display: none;
+            }
+            
+            /* Overlay when sidebar is open */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
             }
         }
     </style>
@@ -278,6 +294,9 @@
 
     <!-- Dashboard Layout (Initially hidden) -->
     <div id="dashboardLayout" style="display: none;">
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        
         <!-- Sidebar -->
         <nav id="sidebar" class="col-lg-2 col-md-3">
             <div class="sidebar-header">
@@ -1187,7 +1206,13 @@
         // Sidebar toggle
         document.getElementById('sidebarCollapse').addEventListener('click', function() {
             document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('content').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        });
+
+        // Close sidebar when clicking on overlay
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('active');
+            this.classList.remove('active');
         });
 
         // Page navigation
@@ -1203,6 +1228,12 @@
                         // Update active state
                         document.querySelectorAll('.sidebar-components .nav-link').forEach(l => l.classList.remove('active'));
                         this.classList.add('active');
+                        
+                        // Close sidebar on mobile after navigation
+                        if (window.innerWidth <= 992) {
+                            document.getElementById('sidebar').classList.remove('active');
+                            document.getElementById('sidebarOverlay').classList.remove('active');
+                        }
                     }
                 });
             });
